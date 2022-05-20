@@ -4,7 +4,6 @@ dependencies:
   - base
   - warp
   - aeson
-  - wai-make-assets
   - servant
   - servant-elm
   - elm-bridge
@@ -13,16 +12,45 @@ dependencies:
   - text
   - transformers
   - containers
+  - wai-app-static
+
+internal-libraries:
+  api:
+    source-dirs:
+      - server/src
+    exposed-modules: Api
+    other-modules: []
 
 executables:
   server:
     main: Main.hs
     source-dirs:
       - server/src
+    dependencies: api
+    other-modules: [App]
+  generate-elm:
+    main: GenerateElm.hs
+    source-dirs:
+      - client/
+    dependencies: api
+    other-modules: []
 
 tests:
   spec:
+    when:
+    # don't generate Paths_example_servant_elm module
+    - condition: false
+      other-modules: Paths_example_servant_elm
+    # remove Main module from server/src/Main.hs
+    # otherwise //:spec generates
+    # <no location info>: error:
+    # module ‘main:Main’ is defined in multiple files: server/src/Main.hs
+    #                                                  server/test/Spec.hs
+    - condition: false
+      other-modules: Main
     main: Spec.hs
+    build-tools:
+      - hspec-discover
     source-dirs:
       - server/test
       - server/src

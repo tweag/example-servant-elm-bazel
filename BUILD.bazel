@@ -1,0 +1,143 @@
+load("@rules_haskell//haskell:defs.bzl", "haskell_binary", "haskell_library", "haskell_test")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+load(
+    "@bazel_gazelle//:def.bzl",
+    "DEFAULT_LANGUAGES",
+    "gazelle_binary",
+)
+
+gazelle(
+    name = "gazelle",
+    data = ["@io_tweag_gazelle_cabal//cabalscan"],
+    gazelle = ":gazelle_binary",
+)
+
+gazelle_binary(
+    name = "gazelle_binary",
+    languages = DEFAULT_LANGUAGES + ["@io_tweag_gazelle_cabal//gazelle_cabal"],
+)
+
+gazelle(
+    name = "gazelle-update-repos",
+    command = "update-repos",
+    data = ["@io_tweag_gazelle_cabal//cabalscan"],
+    extra_args = [
+        "-lang",
+        "gazelle_cabal",
+        "stackage",
+    ],
+    gazelle = ":gazelle_binary",
+)
+
+# rule generated from example-servant-elm.cabal by gazelle_cabal
+haskell_library(
+    name = "api",
+    srcs = ["server/src/Api.hs"],
+    ghcopts = ["-DVERSION_example_servant_elm=\"0.0.0\""],
+    version = "0.0.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@stackage//:aeson",
+        "@stackage//:base",
+        "@stackage//:containers",
+        "@stackage//:elm-bridge",
+        "@stackage//:servant",
+        "@stackage//:servant-elm",
+        "@stackage//:servant-server",
+        "@stackage//:text",
+        "@stackage//:transformers",
+        "@stackage//:wai",
+        "@stackage//:wai-app-static",
+        "@stackage//:warp",
+    ],
+)
+
+# rule generated from example-servant-elm.cabal by gazelle_cabal
+haskell_binary(
+    name = "generate-elm",
+    srcs = ["client/GenerateElm.hs"],
+    ghcopts = ["-DVERSION_example_servant_elm=\"0.0.0\""],
+    main_file = "client/GenerateElm.hs",
+    version = "0.0.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":api",
+        "@stackage//:aeson",
+        "@stackage//:base",
+        "@stackage//:containers",
+        "@stackage//:elm-bridge",
+        "@stackage//:servant",
+        "@stackage//:servant-elm",
+        "@stackage//:servant-server",
+        "@stackage//:text",
+        "@stackage//:transformers",
+        "@stackage//:wai",
+        "@stackage//:wai-app-static",
+        "@stackage//:warp",
+    ],
+)
+
+# rule generated from example-servant-elm.cabal by gazelle_cabal
+haskell_binary(
+    name = "server",
+    srcs = [
+        "server/src/App.hs",
+        "server/src/Main.hs",
+    ],
+    ghcopts = ["-DVERSION_example_servant_elm=\"0.0.0\""],
+    main_file = "server/src/Main.hs",
+    version = "0.0.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":api",
+        "@stackage//:aeson",
+        "@stackage//:base",
+        "@stackage//:containers",
+        "@stackage//:elm-bridge",
+        "@stackage//:servant",
+        "@stackage//:servant-elm",
+        "@stackage//:servant-server",
+        "@stackage//:text",
+        "@stackage//:transformers",
+        "@stackage//:wai",
+        "@stackage//:wai-app-static",
+        "@stackage//:warp",
+    ],
+)
+
+# rule generated from example-servant-elm.cabal by gazelle_cabal
+haskell_test(
+    name = "spec",
+    srcs = [
+        "server/src/Api.hs",
+        "server/src/App.hs",
+        "server/test/AppSpec.hs",
+        "server/test/Spec.hs",
+    ],
+    ghcopts = [
+        "-DVERSION_example_servant_elm=\"0.0.0\"",
+        "-DHSPEC_DISCOVER_HSPEC_DISCOVER_PATH=$(location @stackage-exe//hspec-discover)",
+    ],
+    main_file = "server/test/Spec.hs",
+    tools = ["@stackage-exe//hspec-discover"],
+    version = "0.0.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@stackage//:aeson",
+        "@stackage//:base",
+        "@stackage//:containers",
+        "@stackage//:elm-bridge",
+        "@stackage//:hspec",
+        "@stackage//:http-client",
+        "@stackage//:http-types",
+        "@stackage//:servant",
+        "@stackage//:servant-client",
+        "@stackage//:servant-elm",
+        "@stackage//:servant-server",
+        "@stackage//:text",
+        "@stackage//:transformers",
+        "@stackage//:wai",
+        "@stackage//:wai-app-static",
+        "@stackage//:warp",
+    ],
+)

@@ -3,7 +3,7 @@ module AppSpec where
 import           Control.Exception              ( throwIO
                                                 , ErrorCall(..)
                                                 )
-import           Control.Monad.Trans.Except
+-- import           Control.Monad.Trans.Except
 import           Network.HTTP.Client            ( Manager
                                                 , newManager
                                                 , defaultManagerSettings
@@ -31,9 +31,9 @@ spec = do
         try host getItemIds `shouldReturn` []
 
       context "/api/item/:id" $ do
-        it "returns a 404 for missing items" $ \(manager, baseUrl) -> do
+        it "returns a 404 for missing items" $ \(mgr, bUrl) -> do
           Left err <- runClientM (getItem $ ItemId 23)
-                                 (ClientEnv manager baseUrl Nothing defaultMakeClientRequest)
+                                 (ClientEnv mgr bUrl Nothing defaultMakeClientRequest)
           errorStatus err `shouldBe` (Just notFound404)
 
       context "POST" $ do
@@ -59,17 +59,17 @@ spec = do
 type Host = (Manager, BaseUrl)
 
 try :: Host -> ClientM a -> IO a
-try (manager, baseUrl) action = do
-  result <- runClientM action (ClientEnv manager baseUrl Nothing defaultMakeClientRequest)
+try (mgr, bUrl) action = do
+  result <- runClientM action (ClientEnv mgr bUrl Nothing defaultMakeClientRequest)
   case result of
     Right x   -> return x
     Left  err -> throwIO $ ErrorCall $ show err
 
 withApp :: (Host -> IO a) -> IO a
 withApp action = testWithApplication app $ \port -> do
-  manager <- newManager defaultManagerSettings
+  mgr <- newManager defaultManagerSettings
   let url = BaseUrl Http "localhost" port ""
-  action (manager, url)
+  action (mgr, url)
 
 errorStatus :: ClientError -> Maybe Status
 errorStatus servantError = case servantError of

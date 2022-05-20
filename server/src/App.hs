@@ -6,7 +6,7 @@ import           Control.Concurrent
 import           Control.Monad.IO.Class
 import           Data.Map
 import           Network.Wai
-import           Network.Wai.MakeAssets
+import           Network.Wai.Application.Static (staticApp, defaultFileServerSettings)
 import           Servant
 
 import           Api
@@ -16,15 +16,14 @@ type WithAssets = Api :<|> Raw
 withAssets :: Proxy WithAssets
 withAssets = Proxy
 
-options :: Options
-options = Options "client"
+assets :: Application
+assets = staticApp $ defaultFileServerSettings "assets"
 
 app :: IO Application
 app = serve withAssets <$> server
 
 server :: IO (Server WithAssets)
 server = do
-  assets <- serveAssets options
   db     <- mkDB
   return (apiServer db :<|> Tagged assets)
 
