@@ -10,17 +10,17 @@ This example project illustrates how to set up a project that:
 - Allows a very fast development cycle: You can type-check the server and
   client code in a very short amount of time.
 
-## Makefile
+## ~~Makefile~~
 
-There's a `Makefile` included with the following targets:
+~~There's a `Makefile` included with the following targets:~~
 
-- `setup` -- Set up everything: install ghc and dependencies. (Needs `stack`, `elm`
-  and `elm-test`.)
-- `build` -- Build the server and the client.
-- `server-start` -- Start the server here: <http://localhost:3000/>. Requests sent
+- ~~`setup` -- Set up everything: install ghc and dependencies. (Needs `stack`, `elm`
+  and `elm-test`.)~~
+- ~~`build` -- Build the server and the client.~~
+- ~~`server-start` -- Start the server here: <http://localhost:3000/>. Requests sent
   to this server will trigger a recompilation of the client code (not the server
-  code).
-- `test` -- Recompiles the client and server code. And runs the test-suite.
+  code).~~
+- ~~`test` -- Recompiles the client and server code. And runs the test-suite.~~
 
 ## Caveats
 
