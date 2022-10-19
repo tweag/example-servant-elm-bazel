@@ -10,6 +10,19 @@ This example project illustrates how to set up a project that:
 - Allows a very fast development cycle: You can type-check the server and
   client code in a very short amount of time.
 
+## Bazel
+
+Enter the provided nix shell and execute any of following targets:
+- `:spec` - the test suite target
+- `:server` - backend server target
+- `:generate-elm` - elm binding generation target
+- `:api` - library target
+
+### gazelle_cabal targets
+
+- `:gazelle` - creates `BUILD.bazel` file with targets generated from cabal file
+- `:gazelle-update-repos` - updates `stack_snapshot` repository with dependencies taken from the existing Bazel targets
+
 ## ~~Makefile~~
 
 ~~There's a `Makefile` included with the following targets:~~

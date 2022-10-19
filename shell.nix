@@ -1,13 +1,7 @@
 { pkgs ? import ./nixpkgs.nix {} }:
 with pkgs;
 
-let
-  # used to check bazel > 4.1
-  unstable = import (
-    fetchTarball https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz
-    ){ config = { allowUnfree = true; }; };
-
-in mkShell {
+mkShell {
   BAZEL_USE_CPP_ONLY_TOOLCHAIN=1;
 
   buildInputs = [
@@ -26,8 +20,8 @@ in mkShell {
     zlib
     zlib.dev
     # convenience dependencies
-    less];
-  # buildInputs = [ bazel_4 nix ];
+    less
+  ];
 
   shellHook = ''
     # Add nix config flags to .bazelrc.local.

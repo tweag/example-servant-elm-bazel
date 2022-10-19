@@ -37,17 +37,6 @@ executables:
 
 tests:
   spec:
-    when:
-    # don't generate Paths_example_servant_elm module
-    - condition: false
-      other-modules: Paths_example_servant_elm
-    # remove Main module from server/src/Main.hs
-    # otherwise //:spec generates
-    # <no location info>: error:
-    # module ‘main:Main’ is defined in multiple files: server/src/Main.hs
-    #                                                  server/test/Spec.hs
-    - condition: false
-      other-modules: Main
     main: Spec.hs
     build-tools:
       - hspec-discover
@@ -60,3 +49,4 @@ tests:
       - servant-client
       - http-client
       - http-types
+    other-modules: [AppSpec, Api, App]
