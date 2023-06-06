@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@bazel/concatjs": "^5.8.1",
+    "node": "^19.6.1",
+    "uglify-js": "^3.17.4"
+  }
+}

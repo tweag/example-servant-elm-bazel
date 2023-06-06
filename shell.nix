@@ -5,22 +5,22 @@ mkShell {
   BAZEL_USE_CPP_ONLY_TOOLCHAIN=1;
 
   buildInputs = [
-    bazel_4
+    bat
+    bazel-watcher
+    bazel_5
     binutils
+    cabal-install
     cacert
+    ghc
+    go
+    ghcid
+    hpack
     nix
+    nodejs
     openjdk11
     python3
-    go
-    hpack
-    bat
-    nodejs
-    cabal-install
-    ghc
     zlib
     zlib.dev
-    # convenience dependencies
-    less
   ];
 
   shellHook = ''

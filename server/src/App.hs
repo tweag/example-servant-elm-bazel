@@ -1,31 +1,47 @@
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module App where
 
 import           Control.Concurrent
 import           Control.Monad.IO.Class
 import           Data.Map
+import           Data.Maybe (fromMaybe)
 import           Network.Wai
 import           Network.Wai.Application.Static (staticApp, defaultFileServerSettings)
+import           Network.Wai.Middleware.Cors
 import           Servant
 
 import           Api
+import           System.Environment (lookupEnv)
+
 
 type WithAssets = Api :<|> Raw
 
 withAssets :: Proxy WithAssets
 withAssets = Proxy
 
-assets :: Application
-assets = staticApp $ defaultFileServerSettings "assets"
+mkApp :: FilePath -> Application
+mkApp assetsDir = do
+  staticApp $ defaultFileServerSettings assetsDir
 
-app :: IO Application
-app = serve withAssets <$> server
+obtainAssetsDir :: IO String
+obtainAssetsDir = fromMaybe "assets" <$> lookupEnv "ASSETS_DIR"
 
 server :: IO (Server WithAssets)
 server = do
   db     <- mkDB
-  return (apiServer db :<|> Tagged assets)
+  assets <- obtainAssetsDir
+  return (apiServer db :<|> Tagged (mkApp assets))
+
+app :: IO Application
+app = corsMiddleware <$> serve withAssets <$> server
+  where
+    corsPolicy = simpleCorsResourcePolicy {
+      corsRequestHeaders = ["Content-Type"],
+      corsMethods = ["GET", "POST", "DELETE", "OPTIONS"]
+    }
+    corsMiddleware = cors $ const $ Just corsPolicy
 
 apiServer :: DB -> Server Api
 apiServer db = listItems db :<|> getItem db :<|> postItem db :<|> deleteItem db

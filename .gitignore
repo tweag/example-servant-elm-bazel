@@ -8,3 +8,4 @@ bazel-*
 dist-*
 .envrc
 .direnv
+**/node_modules/

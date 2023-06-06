@@ -1,0 +1,66 @@
+load("@com_github_edschouten_rules_elm//elm:def.bzl", "elm_binary", "elm_library", "elm_test")
+
+exports_files([
+    "GenerateElm.hs",
+    "tests/Test.elm",
+    "src/App.elm",
+    "src/Main.elm",
+])
+
+filegroup(
+    name = "srcs",
+    srcs = [
+        "src/App.elm",
+        "elm.json",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "api-src",
+    outs = ["src/Api.elm"],
+    cmd = "$(execpath //:generate-elm) && cp `dirname $(rootpath //:generate-elm)`/client/src/Api.elm $@",
+    tools = ["//:generate-elm"],
+)
+
+elm_library(
+    name = "api",
+    srcs = [":api-src"],
+    strip_import_prefix = "client/src",
+    deps = [
+        "@elm_package_elm_url",
+        "@elm_package_bartavelle_json_helpers"
+    ],
+)
+
+MAIN_DEPS = [
+    ":api",
+    "@elm_package_elm_browser",
+    "@elm_package_elm_core",
+    "@elm_package_elm_http",
+]
+
+elm_library(
+    name = "main-lib",
+    srcs = ["src/Main.elm"],
+    strip_import_prefix = "client/src",
+    deps = MAIN_DEPS,
+    visibility = ["//visibility:public"],
+)
+
+elm_binary(
+    name = "main",
+    main = "src/Main.elm",
+    deps = MAIN_DEPS,
+    visibility = ["//visibility:public"],
+)
+
+elm_test(
+    name = "spec",
+    main = "tests/Tests.elm",
+    deps = [
+        ":main-lib",
+        "@elm_package_elm_explorations_test",
+    ],
+    node = "@nodejs//:bin/node",
+)

@@ -2,6 +2,12 @@ workspace(name = "example-servant-elm")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+http_archive(
+    name = "build_bazel_rules_nodejs",
+    sha256 = "dcc55f810142b6cf46a44d0180a5a7fb923c04a5061e2e8d8eb05ccccc60864b",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.8.0/rules_nodejs-5.8.0.tar.gz"],
+)
+
 gazelle_cabal_version = "34a41345973cdffa29bf4d5d349439e86fc30ed3"
 
 http_archive(
@@ -34,16 +40,20 @@ bazel_skylib_workspace()
 
 http_archive(
     name = "io_tweag_rules_nixpkgs",
-    sha256 = "33fd540d0283cf9956d0a5a640acb1430c81539a84069114beaf9640c96d221a",
-    strip_prefix = "rules_nixpkgs-81f61c4b5afcf50665b7073f7fce4c1755b4b9a3",
-    urls = ["https://github.com/tweag/rules_nixpkgs/archive/81f61c4b5afcf50665b7073f7fce4c1755b4b9a3.tar.gz"],
+    sha256 = "dc31f6d7e028354500c839a0fe8e2db377518ee7f916542f9cca2b1f13c751f6",
+    strip_prefix = "rules_nixpkgs-6563f78c9e82be839343c0759ed4b9d1e3588b82",
+    urls = ["https://github.com/tweag/rules_nixpkgs/archive/6563f78c9e82be839343c0759ed4b9d1e3588b82.tar.gz"],
 )
+
+load("@io_tweag_rules_nixpkgs//nixpkgs:repositories.bzl", "rules_nixpkgs_dependencies")
+rules_nixpkgs_dependencies()
 
 load(
     "@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl",
     "nixpkgs_local_repository",
     "nixpkgs_package",
     "nixpkgs_python_configure",
+    "nixpkgs_nodejs_configure_platforms",
 )
 
 nixpkgs_local_repository(
@@ -64,9 +74,9 @@ http_archive(
 
 http_archive(
     name = "rules_haskell",
-    sha256 = "851e16edc7c33b977649d66f2f587071dde178a6e5bcfeca5fe9ebbe81924334",
-    strip_prefix = "rules_haskell-0.14",
-    urls = ["https://github.com/tweag/rules_haskell/archive/v0.14.tar.gz"],
+    sha256 = "2a07b55c30e526c07138c717b0343a07649e27008a873f2508ffab3074f3d4f3",
+    strip_prefix = "rules_haskell-0.16",
+    url = "https://github.com/tweag/rules_haskell/archive/refs/tags/v0.16.tar.gz",
 )
 
 load("@rules_haskell//haskell:repositories.bzl", "rules_haskell_dependencies")
@@ -76,7 +86,7 @@ load("@rules_haskell//haskell:nixpkgs.bzl", "haskell_register_ghc_nixpkgs")
 rules_haskell_dependencies()
 
 haskell_register_ghc_nixpkgs(
-    attribute_path = "haskell.compiler.ghc8104",
+    attribute_path = "haskell.compiler.ghc8107",
     compiler_flags = [
         "-Werror",
         "-Wall",
@@ -85,7 +95,7 @@ haskell_register_ghc_nixpkgs(
         "-Wredundant-constraints",
     ],
     repositories = {"nixpkgs": "@nixpkgs"},
-    version = "8.10.4",
+    version = "8.10.7",
 )
 
 ######################################
@@ -125,6 +135,7 @@ stack_snapshot(
         "wai",
         "wai-app-static",
         "warp",
+        "wai-cors", # keep
     ],
     snapshot = "lts-18.12",
 )
@@ -209,3 +220,73 @@ cc_library(
 """,
     repository = "@nixpkgs",
 )
+
+####################
+# elm
+####################
+
+# rules_haskell dependency:
+http_archive(
+    name = "io_bazel_rules_webtesting",
+    sha256 = "3141fb50ac504d0ecf1a159b86e232ebd88547c6c5958c4b0e6b319aaa0871aa",
+    strip_prefix = "rules_webtesting-1460fa2b9a4307765cdf4989019a92ed6e65e51f",
+    urls = [
+        "https://github.com/bazelbuild/rules_webtesting/archive/1460fa2b9a4307765cdf4989019a92ed6e65e51f.tar.gz",
+    ],
+)
+
+load("@io_bazel_rules_webtesting//web:repositories.bzl", "web_test_repositories")
+
+web_test_repositories()
+###############################################################
+
+load("@build_bazel_rules_nodejs//:repositories.bzl", "build_bazel_rules_nodejs_dependencies")
+
+build_bazel_rules_nodejs_dependencies()
+
+nixpkgs_nodejs_configure_platforms(
+    repository = "@nixpkgs",
+    name = "nixpkgs_nodejs"
+)
+
+load("@build_bazel_rules_nodejs//:index.bzl", "npm_install")
+npm_install(
+    name = "npm",
+    node_repository = "nixpkgs_nodejs",
+    exports_directories_only = True,
+    package_json = "//:package.json",
+    package_lock_json = "//:package-lock.json",
+    args = ["--ignore-scripts"],
+)
+
+rules_elm_version = "944cd84f4e0dd101e9d632ca6fb2ceee15e8509a"
+
+http_archive(
+    name = "com_github_edschouten_rules_elm",
+    sha256 = "8a917d768c0aad6f73357e0e4ac00050a8ca1d8949aa0c367361d840892bf681",
+    strip_prefix = "rules_elm-%s" % rules_elm_version,
+    urls = [ "https://github.com/kczulko/rules_elm/archive/%s.tar.gz" % rules_elm_version ],
+)
+
+nixpkgs_package(
+    name = "nodejs",
+    attribute_path = "nodejs",
+    repository = "@nixpkgs",
+)
+
+load("@com_github_edschouten_rules_elm//elm:deps.bzl", "elm_register_toolchains")
+
+elm_register_toolchains()
+
+http_archive(
+    name = "aherrmann_example_servant_elm",
+    sha256 = "40d300848cb1094f290ce5a05836054bbd488a61b3264fca50a69c8603aa13cd",
+    strip_prefix = "example-servant-elm-f567cebb02f5bd18197b6203a65d3d3248fc8d36",
+    urls = [
+        "https://github.com/aherrmann/example-servant-elm/archive/f567cebb02f5bd18197b6203a65d3d3248fc8d36.tar.gz",
+    ],
+)
+
+load("@aherrmann_example_servant_elm//:elm_repositories.bzl", "elm_repositories")
+elm_repositories()
+

@@ -1,4 +1,4 @@
-module Main exposing (FromServer(..), FromUi(..), Model, Msg(..), fromServer, init, main, update, view, viewItem)
+module Main exposing (FromServer(..), FromUi(..), Model, Msg(..), fromServer, main, init, update, view, viewItem)
 
 import Api exposing (..)
 import Browser

@@ -13,8 +13,9 @@ This example project illustrates how to set up a project that:
 ## Bazel
 
 Enter the provided nix shell and execute any of following targets:
-- `:spec` - the test suite target
-- `:server` - backend server target
+- `:spec` - the backend test suite target
+- `:server` - backend server target; web UI is exposed under localhost:3000
+- `//client:spec` - the frontend test suite target
 - `:generate-elm` - elm binding generation target
 - `:api` - library target
 

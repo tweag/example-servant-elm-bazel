@@ -1,4 +1,4 @@
-load("@rules_haskell//haskell:defs.bzl", "haskell_binary", "haskell_library", "haskell_test")
+load("@rules_haskell//haskell:defs.bzl", "haskell_binary", "haskell_library", "haskell_test", "haskell_repl")
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load(
     "@bazel_gazelle//:def.bzl",
@@ -55,9 +55,9 @@ haskell_library(
 # rule generated from example-servant-elm.cabal by gazelle_cabal
 haskell_binary(
     name = "generate-elm",
-    srcs = ["client/GenerateElm.hs"],
+    srcs = ["//client:GenerateElm.hs"],
     ghcopts = ["-DVERSION_example_servant_elm=\"0.0.0\""],
-    main_file = "client/GenerateElm.hs",
+    main_file = "//client:GenerateElm.hs",
     version = "0.0.0",
     visibility = ["//visibility:public"],
     deps = [
@@ -86,6 +86,7 @@ haskell_binary(
     ],
     ghcopts = ["-DVERSION_example_servant_elm=\"0.0.0\""],
     main_file = "server/src/Main.hs",
+    data = ["//assets:assets"], #keep
     version = "0.0.0",
     visibility = ["//visibility:public"],
     deps = [
@@ -102,6 +103,7 @@ haskell_binary(
         "@stackage//:wai",
         "@stackage//:wai-app-static",
         "@stackage//:warp",
+        "@stackage//:wai-cors", # keep
     ],
 )
 
@@ -140,4 +142,11 @@ haskell_test(
         "@stackage//:wai-app-static",
         "@stackage//:warp",
     ],
+)
+
+haskell_repl(
+    name = "dev-server",
+    deps = [ ":server" ],
+    collect_data = True,
+    # data = ["//assets"],
 )

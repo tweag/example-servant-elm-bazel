@@ -1,0 +1,22 @@
+load("@npm//@bazel/concatjs:index.bzl", "concatjs_devserver", "ts_library")
+
+genrule(
+    name = "assets",
+    srcs = ["index.htm"],
+    tools = ["//client:main"],
+    cmd = """
+        cp $(SRCS) $(RULEDIR)/index.html
+        cp $(location //client:main) $(RULEDIR)/main.js
+    """,
+    outs = ["main.js", "index.html"],
+    visibility = ["//visibility:public"],
+)
+
+
+concatjs_devserver(
+    name = "devserver",
+    deps = [":assets"],
+    serving_path = "/assets/index.html",
+    port = 3001,
+)
+
